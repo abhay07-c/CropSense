@@ -1,0 +1,1338 @@
+{% extends "crops/base.html" %}
+
+{% block title %}CropSense — Find Your Best Crop{% endblock %}
+
+{% block home_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+
+:root {
+  --hero-glow-1: rgba(70, 138, 60, 0.14);
+  --hero-glow-2: rgba(193, 122, 60, 0.10);
+  --input-bg-dark: rgba(36, 28, 19, 0.03);
+  --input-border-dark: rgba(36, 28, 19, 0.14);
+  --input-focus-glow: rgba(70, 138, 60, 0.14);
+  --card-surface: var(--glass-bg);
+  --card-surface-hover: var(--glass-bg-hover);
+  --accent-sky: rgba(90, 110, 130, 0.85);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 4rem;
+  align-items: center;
+  min-height: 78vh;
+  padding: 2rem 0 3rem 0;
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -15%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, var(--hero-glow-1) 0%, transparent 65%);
+  filter: blur(80px);
+  z-index: -1;
+  animation: heroGlowPulse 12s ease-in-out infinite alternate;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -15%;
+  right: -10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, var(--hero-glow-2) 0%, transparent 60%);
+  filter: blur(80px);
+  z-index: -1;
+  animation: heroGlowPulse 12s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes heroGlowPulse {
+  0%   { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1;   transform: scale(1.08); }
+}
+
+.hero-text {
+  padding-right: 1rem;
+  opacity: 0;
+  animation: heroTextEnter 1s var(--ease-out-expo) 0.2s forwards;
+}
+
+@keyframes heroTextEnter {
+  from { opacity: 0; transform: translateX(-32px) translateY(16px); }
+  to   { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 100px;
+  background: rgba(70, 138, 60, 0.08);
+  border: 1px solid rgba(70, 138, 60, 0.16);
+  color: var(--emerald-700);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.75rem;
+  backdrop-filter: blur(8px);
+}
+
+.hero-badge .badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--emerald-600);
+  box-shadow: 0 0 8px rgba(70, 138, 60, 0.55);
+  animation: dotPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-text h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  line-height: 1.08;
+  font-size: clamp(2.25rem, 4.5vw, 3.75rem);
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.025em;
+}
+
+.hero-text h1 .highlight {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+  font-style: italic;
+  background: linear-gradient(135deg, var(--emerald-300), var(--emerald-600), var(--warm-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-text h1 .highlight::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  bottom: 2px;
+  width: 104%;
+  height: 6px;
+  background: linear-gradient(90deg, var(--emerald-500), var(--warm-500));
+  border-radius: 4px;
+  opacity: 0.3;
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: sweepRight 0.9s var(--ease-out-expo) 0.9s forwards;
+}
+
+@keyframes sweepRight {
+  to { transform: scaleX(1); }
+}
+
+.hero-text p {
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  max-width: 480px;
+  font-weight: 400;
+}
+
+.form-wrapper {
+  opacity: 0;
+  animation: formEnter 1s var(--ease-out-expo) 0.35s forwards;
+}
+
+@keyframes formEnter {
+  from { opacity: 0; transform: translateX(32px) translateY(16px); }
+  to   { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+.form-card {
+  position: relative;
+  background: var(--card-surface);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 2.25rem;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(36, 28, 19, 0.14), transparent);
+}
+
+.form-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 25px;
+  padding: 1px;
+  background: linear-gradient(
+    160deg,
+    rgba(70, 138, 60, 0.24) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(193, 122, 60, 0.16) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.form-card:hover::after {
+  opacity: 1;
+}
+
+.form-card:hover {
+  transform: translateY(-4px);
+  background: var(--card-surface-hover);
+  box-shadow: var(--shadow-xl), 0 0 80px rgba(70, 138, 60, 0.10);
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.form-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(70, 138, 60, 0.10);
+  border: 1px solid rgba(70, 138, 60, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.form-header-text h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.form-header-text p {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  margin-top: 0.15rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+  font-weight: 400;
+  pointer-events: none;
+  transition: all 0.3s var(--ease-out-expo);
+  padding: 0 0.35rem;
+  border-radius: 4px;
+  z-index: 2;
+}
+
+.form-group input {
+  width: 100%;
+  height: 56px;
+  border: 1px solid var(--input-border-dark);
+  border-radius: 14px;
+  padding: 1.2rem 1rem 0.5rem;
+  background: var(--input-bg-dark);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.3s var(--ease-out-expo);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-group input::placeholder {
+  color: transparent;
+}
+
+.form-group input:focus {
+  border-color: var(--emerald-500);
+  background: rgba(70, 138, 60, 0.05);
+  box-shadow: 0 0 0 3px var(--input-focus-glow), var(--shadow-sm);
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label {
+  top: 0;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--emerald-700);
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 3px var(--bg-primary);
+}
+
+.form-group .input-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s var(--ease-out-expo);
+}
+
+.form-group input:focus ~ .input-icon {
+  opacity: 0.7;
+  transform: translateY(-50%) scale(1.1);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.btn-submit {
+  margin-top: 1.5rem;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--emerald-600), var(--emerald-700));
+  color: var(--text-inverse);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  box-shadow:
+    0 1px 2px rgba(60, 45, 20, 0.2),
+    0 8px 24px rgba(53, 114, 47, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: all 0.35s var(--ease-out-expo);
+}
+
+.btn-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--emerald-500), var(--emerald-600));
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(60, 45, 20, 0.22),
+    0 12px 36px rgba(53, 114, 47, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-submit:hover::before {
+  opacity: 1;
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.btn-submit span,
+.btn-submit svg {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-submit::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: skewX(-20deg);
+  z-index: 1;
+  transition: none;
+}
+
+.btn-submit:hover::after {
+  animation: btnShine 0.7s ease-out forwards;
+}
+
+@keyframes btnShine {
+  to { left: 160%; }
+}
+
+.error-msg {
+  position: absolute;
+  bottom: -1.1rem;
+  left: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.error-msg::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #b91c1c;
+  flex-shrink: 0;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+.feature-card {
+  position: relative;
+  background: var(--card-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: all 0.4s var(--ease-out-expo);
+  opacity: 0;
+  animation: featureEnter 0.8s var(--ease-out-expo) forwards;
+}
+
+.feature-card:nth-child(1) { animation-delay: 0.55s; }
+.feature-card:nth-child(2) { animation-delay: 0.65s; }
+.feature-card:nth-child(3) { animation-delay: 0.75s; }
+
+@keyframes featureEnter {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(36, 28, 19, 0.12), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.feature-card:hover::before {
+  opacity: 1;
+}
+
+.feature-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 21px;
+  padding: 1px;
+  background: linear-gradient(
+    160deg,
+    rgba(70, 138, 60, 0.2) 0%,
+    transparent 40%,
+    transparent 60%,
+    rgba(193, 122, 60, 0.14) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.feature-card:hover::after {
+  opacity: 1;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  background: var(--card-surface-hover);
+  box-shadow: var(--shadow-xl), 0 0 60px rgba(70, 138, 60, 0.08);
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1.25rem;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: rgba(70, 138, 60, 0.08);
+  border: 1px solid rgba(70, 138, 60, 0.14);
+  box-shadow: 0 4px 12px rgba(60, 45, 20, 0.12);
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.feature-card:nth-child(2) .feature-icon {
+  background: rgba(193, 122, 60, 0.10);
+  border-color: rgba(193, 122, 60, 0.16);
+}
+
+.feature-card:nth-child(3) .feature-icon {
+  background: rgba(90, 110, 130, 0.10);
+  border-color: rgba(90, 110, 130, 0.18);
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 8px 20px rgba(60, 45, 20, 0.18);
+}
+
+.feature-card h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.feature-card p {
+  color: var(--text-tertiary);
+  margin: 0;
+  line-height: 1.65;
+  font-size: 0.88rem;
+}
+
+.stats-bar {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-subtle);
+  opacity: 0;
+  animation: heroTextEnter 1s var(--ease-out-expo) 0.5s forwards;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stat-value {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value .accent {
+  color: var(--emerald-600);
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* ================= CROP SLIDER ================= */
+.crop-slider {
+  padding: 3.5rem 0 1rem;
+}
+
+.slider-heading {
+  max-width: 620px;
+  margin-bottom: 2rem;
+}
+
+.slider-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.slider-viewport {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+
+.slider-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.slider-track {
+  display: flex;
+  gap: 1.25rem;
+  padding: 0.35rem 0.25rem 1.5rem;
+}
+
+.crop-slide {
+  flex: 0 0 auto;
+  width: 240px;
+  scroll-snap-align: start;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 0;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo),
+              box-shadow 0.4s var(--ease-out-expo), border-color 0.4s var(--ease-out-expo),
+              background 0.4s var(--ease-out-expo);
+}
+
+.crop-slide.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.crop-slide.is-visible:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: var(--border-strong);
+  background: var(--glass-bg-hover);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+/* Real crop image */
+.crop-media {
+  position: relative;
+  width: 100%;
+  height: 148px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.crop-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transform: scale(1.02);
+  transition: transform 0.55s var(--ease-out-expo), filter 0.4s ease;
+  filter: saturate(1.05) contrast(1.02);
+}
+
+.crop-slide:hover .crop-media img {
+  transform: scale(1.1);
+  filter: saturate(1.12) contrast(1.04);
+}
+
+/* soft bottom fade into card body */
+.crop-media::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42%;
+  background: linear-gradient(
+    to top,
+    rgba(251, 248, 239, 0.92) 0%,
+    rgba(251, 248, 239, 0.35) 45%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.crop-body {
+  padding: 0.85rem 1.25rem 1.35rem;
+  position: relative;
+  z-index: 2;
+  margin-top: -0.35rem;
+}
+
+.crop-body h4 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1.08rem;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.crop-body p {
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin-bottom: 0.9rem;
+  min-height: 3.3em;
+}
+
+.slider-btn {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border-default);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  color: var(--text-secondary);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s var(--ease-out-expo);
+  box-shadow: var(--shadow-sm);
+}
+
+.slider-btn:hover {
+  background: var(--emerald-600);
+  border-color: var(--emerald-600);
+  color: var(--text-inverse);
+  transform: scale(1.08);
+  box-shadow: var(--shadow-md);
+}
+
+.slider-btn:active {
+  transform: scale(0.96);
+}
+
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.slider-dots button {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: var(--border-strong);
+  cursor: pointer;
+  transition: all 0.35s var(--ease-out-expo);
+}
+
+.slider-dots button.active {
+  width: 22px;
+  border-radius: 5px;
+  background: var(--emerald-500);
+}
+
+@media (max-width: 992px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    min-height: auto;
+    padding-top: 1rem;
+  }
+
+  .hero-text {
+    padding-right: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-text p {
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .stats-bar {
+    justify-content: center;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-bar {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-text h1 {
+    font-size: 2rem;
+  }
+
+  .slider-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.15rem;
+  }
+
+  .crop-slide {
+    width: 200px;
+  }
+
+  .crop-media {
+    height: 128px;
+  }
+
+  .crop-body {
+    padding: 0.7rem 1.05rem 1.15rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+
+  <div class="hero-text">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      AI-Powered Guidance
+    </div>
+
+    <h1>Grow smarter with <span class="highlight">data-driven</span> crop selection</h1>
+
+    <p>
+      Input your local soil and climate parameters, and CropSense's intelligence will recommend the most profitable crop for your exact conditions.
+    </p>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-value"><span class="stat-num" data-target="22">0</span><span class="accent">+</span></span>
+        <span class="stat-label">Crop varieties</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value"><span class="stat-num" data-target="95">0</span><span class="accent">%</span></span>
+        <span class="stat-label">Accuracy rate</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value"><span class="stat-num" data-target="7">0</span></span>
+        <span class="stat-label">Input parameters</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-wrapper">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-header-icon">📊</div>
+        <div class="form-header-text">
+          <h3>Soil & Climate Data</h3>
+          <p>Enter your field parameters below</p>
+        </div>
+      </div>
+
+      <form method="POST" action="/predict/">
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <input type="number" step="any" name="N" placeholder=" " value="{{ post_data.N|default:'' }}">
+            <label>Nitrogen (N)</label>
+            <span class="input-icon">🧪</span>
+            {% if errors.N %}<span class="error-msg">{{ errors.N }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <input type="number" step="any" name="P" placeholder=" " value="{{ post_data.P|default:'' }}">
+            <label>Phosphorus (P)</label>
+            <span class="input-icon">⚗️</span>
+            {% if errors.P %}<span class="error-msg">{{ errors.P }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <input type="number" step="any" name="K" placeholder=" " value="{{ post_data.K|default:'' }}">
+            <label>Potassium (K)</label>
+            <span class="input-icon">🔬</span>
+            {% if errors.K %}<span class="error-msg">{{ errors.K }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <input type="number" step="any" name="temperature" placeholder=" " value="{{ post_data.temperature|default:'' }}">
+            <label>Temperature (°C)</label>
+            <span class="input-icon">🌡️</span>
+          </div>
+
+          <div class="form-group">
+            <input type="number" step="any" name="humidity" placeholder=" " value="{{ post_data.humidity|default:'' }}">
+            <label>Humidity (%)</label>
+            <span class="input-icon">💧</span>
+          </div>
+
+          <div class="form-group">
+            <input type="number" step="any" name="ph" placeholder=" " value="{{ post_data.ph|default:'' }}">
+            <label>Soil pH</label>
+            <span class="input-icon">⚖️</span>
+          </div>
+
+          <div class="form-group full-width">
+            <input type="number" step="any" name="rainfall" placeholder=" " value="{{ post_data.rainfall|default:'' }}">
+            <label>Rainfall (mm)</label>
+            <span class="input-icon">🌧️</span>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <span>🌱</span>
+          <span>Run Analysis</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="feature-card">
+    <div class="feature-icon">🧪</div>
+    <h3>Soil Analysis</h3>
+    <p>Accurately parse NPK values and soil acidity to determine true land viability for each crop type.</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-icon">🌡️</div>
+    <h3>Climate Matching</h3>
+    <p>Cross-reference local temperature, humidity and rainfall against ideal crop thresholds.</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-icon">📈</div>
+    <h3>Smart Prediction</h3>
+    <p>Utilize trained AI models to yield highly accurate and profitable crop recommendations.</p>
+  </div>
+</section>
+
+<section class="crop-slider">
+  <div class="slider-heading">
+    <div class="section-label">Crop Library</div>
+    <h2 class="section-title">A closer look at what <span class="gradient-text">CropSense</span> knows</h2>
+    <p class="section-desc">A sample of the varieties in our recommendation engine — drag, use the arrows, or just wait and watch.</p>
+  </div>
+
+  <div class="slider-shell">
+    <button class="slider-btn slider-btn-prev" type="button" aria-label="Previous crop">‹</button>
+
+    <div class="slider-viewport" id="cropViewport">
+      <div class="slider-track" id="cropTrack">
+
+        <div class="crop-slide" data-crop="Rice">
+          <div class="crop-media">
+            <img
+            src="https://images.unsplash.com/photo-1635562985686-4f8bb9c0d3bf?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Rice paddy field"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Rice</h4>
+            <p>Thrives in flooded paddies with high humidity and warm temperatures.</p>
+            <span class="badge badge-emerald badge-dot">High Rainfall</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Wheat">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1564493031643-4be2c4347a17?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Golden wheat field"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Wheat</h4>
+            <p>Grows best in cool weather with moderate rainfall and well-drained loam.</p>
+            <span class="badge badge-emerald badge-dot">Cool Season</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Maize">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1649251037465-72c9d378acb6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Maize corn field"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Maize</h4>
+            <p>Adapts to a wide range of soils given moderate, well-timed rainfall.</p>
+            <span class="badge badge-emerald badge-dot">Versatile</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Sugarcane">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1585155113016-5b8eca4678d4?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Sugarcane crop"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Sugarcane</h4>
+            <p>Needs deep, fertile soil and a long, frost-free growing season.</p>
+            <span class="badge badge-warm badge-dot">High Yield</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Coffee">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1611330556082-0ba06d2780d0?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Coffee beans"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Coffee</h4>
+            <p>Prefers shaded slopes with cool, humid mountain air year-round.</p>
+            <span class="badge badge-warm badge-dot">Highland</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Mango">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1705723115413-a0ec375ac414?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Fresh mangoes"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Mango</h4>
+            <p>Rewards well-drained soil and a distinct dry flowering season.</p>
+            <span class="badge badge-emerald badge-dot">Orchard</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Banana">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1620036924477-c3d6e9ce36fc?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Banana bunch"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Banana</h4>
+            <p>Loves consistent warmth paired with steady year-round moisture.</p>
+            <span class="badge badge-emerald badge-dot">Tropical</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Chickpea">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1677887736557-a461460caaf6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Chickpeas"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Chickpea</h4>
+            <p>Fixes its own nitrogen and holds up well in semi-arid conditions.</p>
+            <span class="badge badge-warm badge-dot">Drought-Hardy</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Lentil">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1612869538502-b5baa439abd7?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Lentils"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Lentil</h4>
+            <p>A hardy, low-water pulse suited to cool, semi-arid growing conditions.</p>
+            <span class="badge badge-warm badge-dot">Low Water</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Groundnut">
+          <div class="crop-media">
+            <img
+              src="https://media.istockphoto.com/id/1409838431/photo/peanuts-plants.webp?a=1&b=1&s=612x612&w=0&k=20&c=WRdqVbRBNZmufGPPEMctfeVaywoZfXEDKaEiJAGmGgc="
+              alt="Groundnuts"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Groundnut</h4>
+            <p>Sets its pods underground, favoring loose, sandy loam and warm days.</p>
+            <span class="badge badge-emerald badge-dot">Nitrogen-Fixing</span>
+          </div>
+        </div>
+
+        <div class="crop-slide" data-crop="Cotton">
+          <div class="crop-media">
+            <img
+              src="https://images.unsplash.com/photo-1649081730200-6346033d8853?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Cotton plant bolls"
+              width="480"
+              height="320"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="crop-body">
+            <h4>Cotton</h4>
+            <p>Wants long, frost-free summers and only moderate rainfall.</p>
+            <span class="badge badge-emerald badge-dot">Warm Season</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="slider-btn slider-btn-next" type="button" aria-label="Next crop">›</button>
+  </div>
+
+  <div class="slider-dots" id="cropDots"></div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var track = document.getElementById('cropTrack');
+  var viewport = document.getElementById('cropViewport');
+  var dotsWrap = document.getElementById('cropDots');
+  if (!track || !viewport || !dotsWrap) return;
+
+  var slides = Array.prototype.slice.call(track.querySelectorAll('.crop-slide'));
+  if (!slides.length) return;
+
+  var prefersReduced = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  slides.forEach(function (slide, i) {
+    slide.style.transitionDelay = (Math.min(i, 6) * 0.06) + 's';
+  });
+
+  if (prefersReduced || !('IntersectionObserver' in window)) {
+    slides.forEach(function (s) { s.classList.add('is-visible'); });
+  } else {
+    var revealIO = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          slides.forEach(function (s) { s.classList.add('is-visible'); });
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.2 });
+    revealIO.observe(track);
+  }
+
+  var dots = slides.map(function (slide, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Go to ' + (slide.dataset.crop || 'slide ' + (i + 1)));
+    b.addEventListener('click', function () {
+      slide.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    });
+    dotsWrap.appendChild(b);
+    return b;
+  });
+
+  function setActive(index) {
+    dots.forEach(function (d, i) { d.classList.toggle('active', i === index); });
+  }
+  setActive(0);
+
+  if ('IntersectionObserver' in window) {
+    var activeIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) setActive(slides.indexOf(entry.target));
+      });
+    }, { root: viewport, threshold: 0.6 });
+    slides.forEach(function (s) { activeIO.observe(s); });
+  }
+
+  function step(dir) {
+    var amount = (slides[0].getBoundingClientRect().width + 20) * dir;
+    viewport.scrollBy({ left: amount, behavior: 'smooth' });
+  }
+
+  var prevBtn = document.querySelector('.slider-btn-prev');
+  var nextBtn = document.querySelector('.slider-btn-next');
+  if (prevBtn) prevBtn.addEventListener('click', function () { step(-1); });
+  if (nextBtn) nextBtn.addEventListener('click', function () { step(1); });
+
+  if (!prefersReduced) {
+    var timer = setInterval(function () {
+      var atEnd = viewport.scrollLeft + viewport.clientWidth >= viewport.scrollWidth - 4;
+      if (atEnd) {
+        viewport.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        step(1);
+      }
+    }, 4200);
+
+    ['mouseenter', 'touchstart', 'focusin'].forEach(function (evt) {
+      viewport.addEventListener(evt, function () { clearInterval(timer); }, { passive: true });
+    });
+  }
+})();
+
+(function () {
+  var bar = document.querySelector('.stats-bar');
+  if (!bar) return;
+  var nums = bar.querySelectorAll('.stat-num');
+  if (!nums.length) return;
+
+  var prefersReduced = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function run(el) {
+    var target = parseFloat(el.getAttribute('data-target')) || 0;
+    if (prefersReduced) { el.textContent = target; return; }
+    var duration = 1100;
+    var start = null;
+    function frame(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target);
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          nums.forEach(run);
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
+    io.observe(bar);
+  } else {
+    nums.forEach(run);
+  }
+})();
+</script>
+{% endblock %}

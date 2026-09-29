@@ -1,0 +1,579 @@
+{% extends "crops/base.html" %}
+
+{% block title %}About — CropSense Precision{% endblock %}
+
+{% block about_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================================
+   ABOUT PAGE — Field Almanac
+   ============================================================ */
+
+.about-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.5rem 0 3rem;
+}
+
+/* ================= HERO ================= */
+.about-hero {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  position: relative;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out-expo) 0.12s forwards;
+}
+
+.about-hero::before {
+  content: '';
+  position: absolute;
+  width: min(520px, 90vw);
+  height: 220px;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(70, 138, 60, 0.12) 0%,
+    rgba(193, 122, 60, 0.05) 45%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: heroGlow 7s ease-in-out infinite alternate;
+}
+
+@keyframes heroGlow {
+  from { opacity: 0.65; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+}
+
+.about-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.about-hero .hero-badge {
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  animation: fadeUp 0.7s var(--ease-out-expo) 0.28s forwards;
+}
+
+.about-hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.15rem, 5.2vw, 3.4rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  margin-bottom: 1.1rem;
+  line-height: 1.12;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out-expo) 0.38s forwards;
+}
+
+.about-hero h1 .highlight {
+  font-style: italic;
+  background: linear-gradient(
+    135deg,
+    var(--emerald-300),
+    var(--emerald-600),
+    var(--warm-500)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.about-hero p {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out-expo) 0.5s forwards;
+}
+
+/* ================= PARAM GRID ================= */
+.param-section {
+  margin-bottom: 2.75rem;
+}
+
+.param-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.param-card {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.45rem 1.15rem 1.35rem;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm), inset 0 -3px 0 0 transparent;
+  transition:
+    transform 0.4s var(--ease-out-expo),
+    background 0.4s var(--ease-out-expo),
+    border-color 0.4s var(--ease-out-expo),
+    box-shadow 0.4s var(--ease-out-expo);
+}
+
+.param-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(36, 28, 19, 0.12), transparent);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.param-card:hover::before { opacity: 1; }
+
+.param-card:hover {
+  transform: translateY(-5px);
+  background: var(--glass-bg-hover);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-xl), var(--shadow-glow), inset 0 -3px 0 0 var(--emerald-400);
+}
+
+.param-icon {
+  font-size: 1.65rem;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(36, 28, 19, 0.035);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  transition: transform 0.4s var(--ease-spring), background 0.35s ease;
+}
+
+.param-card:hover .param-icon {
+  transform: scale(1.08) rotate(-5deg);
+  background: rgba(70, 138, 60, 0.08);
+}
+
+.param-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.3rem;
+  line-height: 1.25;
+}
+
+.param-desc {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+.param-card.span-2 {
+  grid-column: span 2;
+}
+
+/* ================= HOW IT WORKS ================= */
+.how-section {
+  margin-bottom: 2.75rem;
+}
+
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.how-card {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.6rem 1.4rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition:
+    transform 0.4s var(--ease-out-expo),
+    background 0.4s var(--ease-out-expo),
+    border-color 0.4s var(--ease-out-expo),
+    box-shadow 0.4s var(--ease-out-expo);
+}
+
+.how-card:hover {
+  transform: translateY(-4px);
+  background: var(--glass-bg-hover);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.how-step {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--emerald-600);
+  margin-bottom: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.how-step::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--emerald-500);
+  box-shadow: 0 0 0 4px rgba(70, 138, 60, 0.12);
+}
+
+.how-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.25;
+}
+
+.how-card p {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* ================= WHY / VALUE ================= */
+.why-section {
+  margin-bottom: 2.5rem;
+}
+
+.why-card {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 2.25rem 2.35rem;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+}
+
+.why-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(36, 28, 19, 0.12), transparent);
+}
+
+.why-intro {
+  max-width: 640px;
+  margin-bottom: 1.5rem;
+}
+
+.why-intro h2 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 0.55rem;
+  line-height: 1.2;
+}
+
+.why-intro p {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.benefit-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.benefit-list li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(36, 28, 19, 0.025);
+  border: 1px solid var(--border-subtle);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s var(--ease-out-expo);
+}
+
+.benefit-list li:hover {
+  background: rgba(70, 138, 60, 0.06);
+  border-color: rgba(70, 138, 60, 0.18);
+  transform: translateY(-2px);
+}
+
+.benefit-list .check {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(70, 138, 60, 0.12);
+  color: var(--emerald-700);
+  margin-top: 1px;
+}
+
+.benefit-list strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ================= CTA ================= */
+.about-cta {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.about-cta p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.about-cta .btn svg {
+  transition: transform 0.35s var(--ease-out-expo);
+}
+
+.about-cta .btn:hover svg {
+  transform: translateX(3px);
+}
+
+/* ================= STAGGER + REVEAL ================= */
+.reveal-delay-1 { transition-delay: 0.06s; }
+.reveal-delay-2 { transition-delay: 0.12s; }
+.reveal-delay-3 { transition-delay: 0.18s; }
+.reveal-delay-4 { transition-delay: 0.24s; }
+
+.stagger-children.stagger-fast > *:nth-child(1) { animation-delay: 0.06s; }
+.stagger-children.stagger-fast > *:nth-child(2) { animation-delay: 0.12s; }
+.stagger-children.stagger-fast > *:nth-child(3) { animation-delay: 0.18s; }
+.stagger-children.stagger-fast > *:nth-child(4) { animation-delay: 0.24s; }
+.stagger-children.stagger-fast > *:nth-child(5) { animation-delay: 0.3s; }
+.stagger-children.stagger-fast > *:nth-child(6) { animation-delay: 0.36s; }
+.stagger-children.stagger-fast > *:nth-child(7) { animation-delay: 0.42s; }
+.stagger-children.stagger-fast > *:nth-child(8) { animation-delay: 0.48s; }
+
+.reveal.stagger-children:not(.is-visible) > * {
+  animation: none;
+  opacity: 0;
+}
+.reveal.stagger-children.is-visible > * {
+  animation: fadeUp 0.65s var(--ease-out-expo) forwards;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 850px) {
+  .param-grid { grid-template-columns: repeat(2, 1fr); }
+  .param-card.span-2 { grid-column: span 2; }
+  .how-grid { grid-template-columns: 1fr; }
+  .benefit-list { grid-template-columns: 1fr; }
+  .why-card { padding: 1.75rem 1.5rem; }
+  .about-hero { margin-bottom: 2.75rem; }
+}
+
+@media (max-width: 480px) {
+  .param-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+  .param-card.span-2 { grid-column: span 1; }
+  .about-hero h1 { font-size: 2rem; }
+  .how-card { padding: 1.35rem 1.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-hero,
+  .about-hero .hero-badge,
+  .about-hero h1,
+  .about-hero p {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .about-hero::before {
+    animation: none;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+
+  <section class="about-hero">
+    <div class="hero-badge badge badge-emerald">
+      <span class="badge-dot"></span>
+      Engineered for Precision
+    </div>
+    <h1>The Science of <span class="highlight">Precision</span></h1>
+    <p>
+      CropSense bridges the gap between complex agricultural data and actionable farming decisions.
+      Our AI analyzes seven critical environmental parameters to deliver highly accurate,
+      profit-optimized crop recommendations.
+    </p>
+  </section>
+
+  <!-- WHAT WE ANALYZE -->
+  <section class="param-section reveal reveal-delay-1">
+    <div class="section-label">Analysis Matrix</div>
+    <div class="param-grid stagger-children stagger-fast">
+      <div class="param-card">
+        <span class="param-icon" aria-hidden="true">🧪</span>
+        <div class="param-name">Nitrogen (N)</div>
+        <div class="param-desc">Leaf growth &amp; chlorophyll synthesis</div>
+      </div>
+      <div class="param-card">
+        <span class="param-icon" aria-hidden="true">⚗️</span>
+        <div class="param-name">Phosphorus (P)</div>
+        <div class="param-desc">Root development &amp; energy transfer</div>
+      </div>
+      <div class="param-card">
+        <span class="param-icon" aria-hidden="true">🔬</span>
+        <div class="param-name">Potassium (K)</div>
+        <div class="param-desc">Disease resistance &amp; water regulation</div>
+      </div>
+      <div class="param-card">
+        <span class="param-icon" aria-hidden="true">⚖️</span>
+        <div class="param-name">Soil pH</div>
+        <div class="param-desc">Nutrient availability &amp; microbial health</div>
+      </div>
+      <div class="param-card">
+        <span class="param-icon" aria-hidden="true">💧</span>
+        <div class="param-name">Humidity</div>
+        <div class="param-desc">Transpiration rate &amp; fungal risk</div>
+      </div>
+      <div class="param-card">
+        <span class="param-icon" aria-hidden="true">🌧️</span>
+        <div class="param-name">Rainfall</div>
+        <div class="param-desc">Water supply &amp; irrigation planning</div>
+      </div>
+      <div class="param-card span-2">
+        <span class="param-icon" aria-hidden="true">🌡️</span>
+        <div class="param-name">Temperature</div>
+        <div class="param-desc">Metabolic rate &amp; seasonal viability</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS (replaces Custom Architecture) -->
+  <section class="how-section reveal reveal-delay-2">
+    <div class="section-label">How It Works</div>
+    <div class="how-grid stagger-children stagger-fast">
+      <article class="how-card">
+        <div class="how-step">Step 01</div>
+        <h3>Enter field data</h3>
+        <p>
+          Provide soil nutrients (N, P, K), pH, temperature, humidity, and rainfall for your plot.
+          No lab jargon required — just the values you already measure or can estimate.
+        </p>
+      </article>
+      <article class="how-card">
+        <div class="how-step">Step 02</div>
+        <h3>AI matches crops</h3>
+        <p>
+          CropSense compares your conditions against agronomic patterns to rank crops by
+          suitability, so you see the strongest fits first — not a single black-box answer.
+        </p>
+      </article>
+      <article class="how-card">
+        <div class="how-step">Step 03</div>
+        <h3>Act with confidence</h3>
+        <p>
+          Review match probabilities, seasonal context, and your input summary. Use the
+          recommendation to plan planting, inputs, and irrigation with clearer priorities.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- WHY IT MATTERS -->
+  <section class="why-section reveal reveal-delay-3">
+    <div class="section-label">Why CropSense</div>
+    <div class="why-card">
+      <div class="why-intro">
+        <h2>Better crop choices start with better signals</h2>
+        <p>
+          Guesswork costs seed, fertilizer, and a full season. CropSense turns soil and climate
+          readings into a short list of crops that fit your field — so you can plant with intent.
+        </p>
+      </div>
+      <ul class="benefit-list">
+        <li>
+          <span class="check" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span><strong>Seven-parameter analysis</strong> — nutrients, pH, and climate in one pass</span>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span><strong>Ranked recommendations</strong> — top matches with clear confidence scores</span>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span><strong>Season-aware guidance</strong> — context that supports real planting windows</span>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span><strong>Fast, practical workflow</strong> — from field numbers to a decision in seconds</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="about-cta reveal reveal-delay-4">
+    <p>Ready to see what fits your soil and climate?</p>
+    <a href="{% url 'index' %}" class="btn btn-primary">
+      <span>Run a field analysis</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </section>
+
+</div>
+{% endblock %}
